@@ -1,0 +1,78 @@
+on:
+  workflow_call:
+    inputs:
+      ENVIRONMENT:
+        required: true
+        type: string
+      SERVER_HOST:
+        required: true
+        type: string
+      SERVER_USERNAME:
+        required: true
+        type: string
+      ECR_REGISTRY:
+        required: false
+        type: string
+        default: ''
+      AWS_DEFAULT_REGION:
+        required: false
+        type: string
+        default: 'us-east-1'
+      APP_NAME:
+        required: true
+        type: string
+      APP_PORT:
+        required: true
+        type: string
+      APP_ADDITIONAL_SERVICES:
+        required: false
+        type: string
+        default: ''
+      DEPLOYMENT_STRATEGY:
+        required: false
+        type: string
+        default: 'direct'
+      APP_DOMAIN_PUBLIC:
+        required: false
+        type: string
+        default: ''
+      APP_DOMAIN_PRIVATE:
+        required: false
+        type: string
+        default: ''
+
+    secrets:
+      ORG_ASCENTY_SERVER_PRIVATE_KEY:
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ["self-hosted", "ascenty"]
+    environment: ${{ inputs.ENVIRONMENT }}
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Docker Swarm Deploy
+        uses: mobi2buy/gh-actions-docker-swarm-w-aws-ecr@v1
+        with:
+          ENVIRONMENT: ${{ inputs.ENVIRONMENT }}
+          ECR_REGISTRY: ${{ inputs.ECR_REGISTRY }}
+          APP_NAME: ${{ inputs.APP_NAME }}
+          APP_PORT: ${{ inputs.APP_PORT }}
+          APP_ADDITIONAL_SERVICES: ${{ inputs.APP_ADDITIONAL_SERVICES }}
+          SERVER_HOST: ${{ inputs.SERVER_HOST }}
+          SERVER_USERNAME: ${{ inputs.SERVER_USERNAME }}
+          SERVER_SSH_KEY: ${{ secrets.ORG_ASCENTY_SERVER_PRIVATE_KEY }}
+          AWS_ACCESS_KEY_ID_PIPELINE: ${{ secrets[format('ORG_AWS_ACCESS_KEY_ID_PIPELINE_{0}', inputs.ENVIRONMENT)] }}
+          AWS_SECRET_ACCESS_KEY_PIPELINE: ${{ secrets[format('ORG_AWS_SECRET_ACCESS_KEY_PIPELINE_{0}', inputs.ENVIRONMENT)] }}
+          AWS_DEFAULT_REGION_PIPELINE: ${{ inputs.AWS_DEFAULT_REGION }}
+          DEPLOYMENT_STRATEGY: ${{ inputs.DEPLOYMENT_STRATEGY }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.ORG_GITHUB_READ_PACKAGES_TOKEN }}
+          JSON_SECRETS_CONTEXT: ${{ toJson(secrets) }}
+          SERVER_DOCKER_PATH: /home/mobiuser/n8n-self-hosted-ai-starter-kit
+          DISCORD_WEBHOOK: ${{ secrets.ORG_DISCORD_AURORA }}
+          APP_DOMAIN_PUBLIC: ${{ inputs.APP_DOMAIN_PUBLIC }}
+          APP_DOMAIN_PRIVATE: ${{ inputs.APP_DOMAIN_PRIVATE }}

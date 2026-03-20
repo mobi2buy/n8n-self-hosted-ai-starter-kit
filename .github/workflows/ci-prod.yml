@@ -1,0 +1,30 @@
+concurrency:
+  group: Prod
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'README.md'
+      - 'QUICK_START.md'
+      - 'CONTRIBUTING.md'
+      - '**/*.sql'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    uses: ./.github/workflows/ci-common.yml
+    with:
+      ENVIRONMENT: Prod
+      SERVER_HOST: prd1-mobi-ds.ascenty
+      SERVER_USERNAME: mobiuser
+      ECR_REGISTRY: ''
+      AWS_DEFAULT_REGION: us-east-1
+      APP_NAME: n8n-self-hosted-ai-starter-kit
+      APP_PORT: '5678'
+      DEPLOYMENT_STRATEGY: direct
+    secrets: inherit
