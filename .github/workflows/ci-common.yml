@@ -55,7 +55,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Docker Swarm Deploy
-        uses: mobi2buy/gh-actions-docker-swarm-w-aws-ecr@v1
+        uses: mobi2buy/gh-actions-docker-swarm-deploy@v1
         with:
           ENVIRONMENT: ${{ inputs.ENVIRONMENT }}
           ECR_REGISTRY: ${{ inputs.ECR_REGISTRY }}
